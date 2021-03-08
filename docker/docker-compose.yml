@@ -1,0 +1,42 @@
+version: '3.3'
+
+services:
+  fireflyiii:
+    image: jc5x/firefly-iii:${DOCKER_TAG}
+    volumes:
+      - firefly_iii_upload:/var/www/html/storage/upload
+    env_file: .env
+    depends_on:
+      - fireflyiiidb
+    networks:
+      - proxy
+      - internal
+#    ports:
+#      - 81:8080
+    labels:
+      - "traefik.http.routers.fireflyiii.entrypoints=web,websecure"
+      - 'traefik.http.routers.fireflyiii.rule=Host(`${FRONTEND_RULE}`)'
+      - "traefik.http.services.fireflyiii.loadbalancer.server.port=8080"
+      - 'traefik.enable=true'
+    restart: always
+  fireflyiiidb:
+    image: mariadb:10
+    networks:
+      - internal
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_DATABASE}
+    volumes:
+      - firefly_iii_db:/var/lib/mysql
+volumes:
+  firefly_iii_upload:
+  firefly_iii_db:
+
+networks:
+  proxy:
+    external:
+      name: ${PROXY_NAME}
+  internal:
+    driver: bridge
