@@ -11,8 +11,6 @@ services:
     networks:
       - proxy
       - internal
-#    ports:
-#      - 81:8080
     labels:
       - "traefik.http.routers.fireflyiii.entrypoints=web,websecure"
       - 'traefik.http.routers.fireflyiii.rule=Host(`${FRONTEND_RULE}`)'
@@ -30,6 +28,21 @@ services:
       - MYSQL_DATABASE=${DB_DATABASE}
     volumes:
       - firefly_iii_db:/var/lib/mysql
+#  firefly-bot:
+#    image: vjfalk1/firefly-telegram-bot:latest
+#    environment:
+#      - TELEGRAM_BOT_TOKEN=xxxxxx
+#    volumes:
+#      - ../telegram_bot/config:/config
+#    networks:
+#      - proxy
+#      - internal
+#    labels:
+#      - "traefik.http.routers.fireflybot.entrypoints=web,websecure"
+#      - 'traefik.http.routers.fireflybot.rule=Host(`${TRAEFIK_FRONTEND_RULE}`) && (PathPrefix(`/api`) || PathPrefix(`/telegram`))'
+#      - "traefik.http.services.fireflybot.loadbalancer.server.port=8080"
+#      - 'traefik.enable=true'
+
 volumes:
   firefly_iii_upload:
   firefly_iii_db:
