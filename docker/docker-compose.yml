@@ -40,6 +40,7 @@ services:
       - MYSQL_DATABASE=${DB_DATABASE}
     volumes:
       - firefly_iii_db:/var/lib/mysql
+    restart: always
 #  firefly-bot:
 #    image: vjfalk1/firefly-telegram-bot:latest
 #    environment:
