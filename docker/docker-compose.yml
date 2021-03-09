@@ -15,6 +15,18 @@ services:
       - "traefik.http.routers.fireflyiii.entrypoints=web,websecure"
       - 'traefik.http.routers.fireflyiii.rule=Host(`${FRONTEND_RULE}`)'
       - "traefik.http.services.fireflyiii.loadbalancer.server.port=8080"
+      - "traefik.http.services.fireflyiii.loadbalancer.passHostHeader=true"
+        # Create a middleware named `fireflyHeaders`
+      - "traefik.http.middlewares.fireflyHeaders.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.fireflyHeaders.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.fireflyHeaders.headers.stsPreload=true"
+      - "traefik.http.middlewares.fireflyHeaders.headers.forceSTSHeader=true"
+      - "traefik.http.middlewares.fireflyHeaders.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.fireflyHeaders.headers.browserXSSFilter=true"
+      - "traefik.http.middlewares.fireflyHeaders.headers.customFrameOptionsValue=SAMEORIGIN"
+      - "traefik.http.middlewares.fireflyHeaders.headers.customResponseHeaders=Referrer-Policy:origin"
+        # Apply the middleware named `fireflyHeaders` to the router named `fireflyiii`
+      - "traefik.http.routers.fireflyiii.middlewares=fireflyHeaders@docker"
       - 'traefik.enable=true'
     restart: always
   fireflyiiidb:
@@ -28,6 +40,7 @@ services:
       - MYSQL_DATABASE=${DB_DATABASE}
     volumes:
       - firefly_iii_db:/var/lib/mysql
+    restart: always
 #  firefly-bot:
 #    image: vjfalk1/firefly-telegram-bot:latest
 #    environment:
