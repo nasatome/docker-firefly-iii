@@ -1,4 +1,4 @@
 #!/bin/bash
 echo "CRON from cronjob.sh"
-docker-compose -f /opt/prj/docker-firefly-iii/docker/docker-compose.yml exec -u www-data fireflyiii php artisan firefly:cron
+/usr/local/bin/docker-compose -f /opt/prj/docker-firefly-iii/docker/docker-compose.yml exec -u www-data fireflyiii /usr/bin/php /var/www/html/artisan firefly:cron
 echo "=====End===="
