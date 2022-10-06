@@ -1,13 +1,16 @@
-version: '3.3'
+version: '3.8'
 
 services:
-  fireflyiii:
-    image: jc5x/firefly-iii:${DOCKER_TAG}
+  app:
+    image: fireflyiii/core:latest
+    restart: always
     volumes:
       - firefly_iii_upload:/var/www/html/storage/upload
     env_file: .env
+#    ports:
+#      - 80:8080
     depends_on:
-      - fireflyiiidb
+      - db
     networks:
       - proxy
       - internal
@@ -15,32 +18,35 @@ services:
       - "traefik.http.routers.fireflyiii.entrypoints=web,websecure"
       - 'traefik.http.routers.fireflyiii.rule=Host(`${FRONTEND_RULE}`)'
       - "traefik.http.services.fireflyiii.loadbalancer.server.port=8080"
-#      - "traefik.http.services.fireflyiii.loadbalancer.passHostHeader=true"
-#        # Create a middleware named `fireflyHeaders`
-#      - "traefik.http.middlewares.fireflyHeaders.headers.stsSeconds=31536000"
-#      - "traefik.http.middlewares.fireflyHeaders.headers.stsIncludeSubdomains=true"
-#      - "traefik.http.middlewares.fireflyHeaders.headers.stsPreload=true"
-#      - "traefik.http.middlewares.fireflyHeaders.headers.forceSTSHeader=true"
-#      - "traefik.http.middlewares.fireflyHeaders.headers.contentTypeNosniff=true"
-#      - "traefik.http.middlewares.fireflyHeaders.headers.browserXSSFilter=true"
-#      - "traefik.http.middlewares.fireflyHeaders.headers.customFrameOptionsValue=SAMEORIGIN"
-#      - "traefik.http.middlewares.fireflyHeaders.headers.customResponseHeaders=Referrer-Policy:origin"
-#        # Apply the middleware named `fireflyHeaders` to the router named `fireflyiii`
-#      - "traefik.http.routers.fireflyiii.middlewares=fireflyHeaders@docker"
       - 'traefik.enable=true'
-    restart: always
-  fireflyiiidb:
+  db:
     image: mariadb:10
-    networks:
-      - internal
+    restart: always
     environment:
       - MYSQL_RANDOM_ROOT_PASSWORD=yes
       - MYSQL_USER=${DB_USERNAME}
       - MYSQL_PASSWORD=${DB_PASSWORD}
       - MYSQL_DATABASE=${DB_DATABASE}
+    networks:
+      - internal
     volumes:
       - firefly_iii_db:/var/lib/mysql
-    restart: always
+#  fidi:
+#    image: fireflyiii/data-importer:latest
+#    restart: always
+#    env_file: .fidi.env
+#    networks:
+#      - proxy
+#      - internal
+#    labels:
+#      - "traefik.http.routers.fireflyiiifidi.entrypoints=web,websecure"
+#      - 'traefik.http.routers.fireflyiiifidi.rule=Host(`${FRONTEND_RULE_FIDI}`)'
+#      - "traefik.http.services.fireflyiiifidi.loadbalancer.server.port=8080"
+#      - 'traefik.enable=true'
+##    ports:
+##      - 8081:8080
+#    depends_on:
+#      - app
 #  firefly-bot:
 #    image: vjfalk1/firefly-telegram-bot:latest
 #    environment:
@@ -62,7 +68,7 @@ volumes:
 
 networks:
   proxy:
-    external:
-      name: ${PROXY_NAME}
+    name: ${PROXY_NAME}
+    external: true
   internal:
     driver: bridge
