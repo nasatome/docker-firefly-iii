@@ -31,6 +31,38 @@ services:
       - internal
     volumes:
       - firefly_iii_db:/var/lib/mysql
+  restic:
+    container_name: restic
+    image: mazzolino/restic
+    hostname: docker
+    environment:
+      BACKUP_CRON: ${RESTIC_BACKUP_CRON}
+      RESTIC_REPOSITORY: b2:${B2_BUCKET_NAME}:/restic
+      RESTIC_PASSWORD: ${RESTIC_PASSWORD}
+      RESTIC_BACKUP_SOURCES: /source
+      B2_ACCOUNT_ID: ${B2_KEY_ID}
+      B2_ACCOUNT_KEY: ${B2_APP_KEY}
+    volumes:
+        - firefly_iii_upload:/source/upload
+        - firefly_iii_db_backup:/source/db_backup
+  mysql-cron-backup:
+    container_name: software_fireflyiii_db_backuper
+    image: fradelg/mysql-cron-backup
+    networks:
+      - internal
+    depends_on:
+      - db
+    volumes:
+      - firefly_iii_db_backup:/backup
+    environment:
+      - MYSQL_HOST=${DB_HOST}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASS=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MAX_BACKUPS=${MAX_BACKUPS}
+      - INIT_BACKUP=1
+      - CRON_TIME=${MYSQL_BACKUP_CRON}
+      - GZIP_LEVEL=9 # High compression level
 #  fidi:
 #    image: fireflyiii/data-importer:latest
 #    restart: always
@@ -65,6 +97,7 @@ services:
 volumes:
   firefly_iii_upload:
   firefly_iii_db:
+  firefly_iii_db_backup:
 
 networks:
   proxy:
