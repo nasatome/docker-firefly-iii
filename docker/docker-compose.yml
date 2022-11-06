@@ -34,6 +34,7 @@ services:
   restic:
     container_name: restic
     image: mazzolino/restic
+    restart: always
     hostname: docker
     environment:
       BACKUP_CRON: ${RESTIC_BACKUP_CRON}
@@ -48,6 +49,7 @@ services:
   mysql-cron-backup:
     container_name: software_fireflyiii_db_backuper
     image: fradelg/mysql-cron-backup
+    restart: always
     networks:
       - internal
     depends_on:
